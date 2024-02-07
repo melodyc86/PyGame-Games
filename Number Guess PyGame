@@ -1,0 +1,82 @@
+import pygame
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Set up the display
+width, height = 640, 480
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Number Guessing Game")
+
+# Set up font
+font = pygame.font.Font(None, 36)
+
+# Game variables
+secret_number = random.randint(1, 100)
+input_text = ''
+message = "Guess a number between 1 and 100"
+game_over = False
+
+# Input text function
+def input_box(text, font, color, x, y, w, h):
+    # Render the text the user has typed
+    text_surf = font.render(text, True, color)
+    text_rect = text_surf.get_rect()
+    text_rect.topleft = (x, y)
+    screen.blit(text_surf, text_rect)
+    # Draw the rectangle around the input area
+    pygame.draw.rect(screen, color, [x, y, w, h], 2)
+
+# Game loop
+running = True
+while running:
+    # Event handling
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            # Exit the game if the window is closed
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            # Skip any input if the game is over
+            if game_over:
+                continue
+            
+            if event.key == pygame.K_RETURN:
+                # When Enter is pressed, process the guess
+                try:
+                    guess = int(input_text)
+                    if guess == secret_number:
+                        message = f"Correct! The number was {secret_number}."
+                        game_over = True
+                    else:
+                        #check if its hot or cold
+                        if abs(guess - secret_number) <= 10: 
+                            message = "Hot!"
+                        else: 
+                            message ="Cold!"
+                        # Add higher or lower hint
+                        if guess < secret_number:
+                            message += " Hmm...Try a higher number"
+                        else:
+                            message += " Hmm...Try a lower number"
+
+                    
+                except ValueError:
+                    message = "Please enter a valid number."
+                input_text = ''
+            elif event.key == pygame.K_BACKSPACE:
+                # Remove the last character if backspace is pressed
+                input_text = input_text[:-1]
+            else:
+                # Add the pressed key to the input text
+                input_text += event.unicode
+
+    # Render
+    screen.fill((255, 255, 255))
+    input_box(input_text, font, (0,0,0), 100, height // 2, width // 2, 32)
+    message_surface = font.render(message, True, (0, 0, 0))
+    screen.blit(message_surface, (100, 100))
+    pygame.display.flip()
+
+# Quit Pygame
+pygame.quit()
